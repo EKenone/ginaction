@@ -1,4 +1,4 @@
-module github.com/EKenone/ginaction
+module github.com/tdeken/ginaction
 
 go 1.16
 
