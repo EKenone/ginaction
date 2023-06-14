@@ -1,8 +1,8 @@
 package example
 
 import (
-	"ginaction"
 	"github.com/gin-gonic/gin"
+	"github.com/tdeken/ginaction"
 )
 
 type Demo struct {

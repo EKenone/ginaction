@@ -2,8 +2,8 @@ package example
 
 import (
 	"fmt"
-	"ginaction"
 	"github.com/gin-gonic/gin"
+	"github.com/tdeken/ginaction"
 )
 
 type Api struct {

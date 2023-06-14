@@ -1,8 +1,8 @@
 package example
 
 import (
-	"ginaction"
 	"github.com/gin-gonic/gin"
+	"github.com/tdeken/ginaction"
 )
 
 var Server *gin.Engine
