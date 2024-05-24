@@ -9,6 +9,10 @@ import (
 func TestServer(t *testing.T) {
 	Server := gin.Default()
 
+	Server.GET("/", func(context *gin.Context) {
+		context.ClientIP()
+	})
+
 	AutoRegister(Server.Group("api"), TestDemo{})
 
 	if err := Server.Run(":8080"); err != nil {
@@ -51,7 +55,6 @@ func (a TestDemo) test1(c *gin.Context) {
 func (a TestDemo) testPath2(c *gin.Context) {
 
 }
-
 func (a TestDemo) testPath3(c *gin.Context) {
 
 }

@@ -11,12 +11,6 @@ const defaultMidSep = '-'
 
 type MidType uint8
 
-type Controller interface {
-	Register() []Action                                       //需要中间件的方法
-	Group() string                                            //控制器分组
-	ChooseMid(router *gin.RouterGroup, t MidType) gin.IRoutes //选择中间件
-}
-
 type Action struct {
 	method   string          //请求方法
 	do       gin.HandlerFunc //执行函数
@@ -38,31 +32,6 @@ func NewAction(method string, do gin.HandlerFunc, opts ...Option) Action {
 	}
 
 	return action
-}
-
-type midTypeMap struct {
-	group  *gin.RouterGroup
-	routes gin.IRoutes
-}
-
-// AutoRegister 自动注册路由
-func AutoRegister(router *gin.RouterGroup, cs ...Controller) {
-	for _, c := range cs {
-		var midMap = make(map[MidType]midTypeMap)
-		for _, v := range c.Register() {
-			midR, ok := midMap[v.midType]
-			if !ok {
-				r := router.Group(c.Group())
-				midR = midTypeMap{
-					group:  r,
-					routes: c.ChooseMid(r, v.midType),
-				}
-
-				midMap[v.midType] = midR
-			}
-			midR.routes.Handle(v.method, v.createLastPath(), v.do)
-		}
-	}
 }
 
 // 默认的路由最后一部分
