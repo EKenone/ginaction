@@ -9,7 +9,7 @@ import (
 
 const defaultMidSep = '-'
 
-type MidType uint8
+type MidType any
 
 type Action struct {
 	method   string          //请求方法

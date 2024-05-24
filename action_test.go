@@ -1,9 +1,16 @@
 package ginaction
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestServer(t *testing.T) {
@@ -15,21 +22,47 @@ func TestServer(t *testing.T) {
 
 	AutoRegister(Server.Group("api"), TestDemo{})
 
-	if err := Server.Run(":8080"); err != nil {
-		panic(err)
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: Server,
 	}
+
+	//启动HTTP服务器
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	//等待一个INT或TERM信号
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
+
+	//创建超时上下文，Shutdown可以让未处理的连接在这个时间内关闭
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	//停止HTTP服务器
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+
+	return
 }
 
 type TestDemo struct {
 }
 
 // ChooseMid 可以选择的服务中间件
-func (a TestDemo) ChooseMid(router *gin.RouterGroup, t MidType) gin.IRoutes {
+func (a TestDemo) ChooseMid(t MidType) []gin.HandlerFunc {
+
 	switch t {
 	case 1:
-		return router.Use(Trace2())
+		return []gin.HandlerFunc{Trace2()}
 	default:
-		return router.Use(Trace())
+		return []gin.HandlerFunc{Trace()}
 	}
 }
 
@@ -49,7 +82,10 @@ func (a TestDemo) Register() []Action {
 }
 
 func (a TestDemo) test1(c *gin.Context) {
-
+	time.Sleep(10 * time.Second)
+	c.JSON(200, gin.H{
+		"aaa": 1,
+	})
 }
 
 func (a TestDemo) testPath2(c *gin.Context) {
@@ -66,7 +102,7 @@ func (a TestDemo) testPath4(c *gin.Context) {
 // Trace 链路追踪
 func Trace() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println(111)
+		fmt.Printf("12312dsaflk\r\n")
 		c.Next()
 	}
 }
